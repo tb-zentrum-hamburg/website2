@@ -8281,9 +8281,23 @@ document.querySelectorAll('article.language-page').forEach(function(art,i){
     var pw=inp.value.trim();btn.disabled=true;say('\u2026');
     try{
       var bytes=await encryptPdf(f,pw);
-      var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
-      a.download=f.name.replace(/\.pdf$/i,'')+'_verschluesselt.pdf';document.body.appendChild(a);a.click();
-      setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000);
+      var outName=f.name.replace(/\.pdf$/i,'')+'_verschluesselt.pdf';
+      var blob=new Blob([bytes],{type:'application/pdf'});
+      var shared=false;
+      try{
+        var sf=new File([blob],outName,{type:'application/pdf'});
+        if(navigator.canShare&&navigator.canShare({files:[sf]})){
+          await navigator.share({files:[sf]});
+          shared=true;
+        }
+      }catch(shareErr){
+        if(shareErr&&shareErr.name==='AbortError'){say('');btn.disabled=false;file.value='';return}
+      }
+      if(!shared){
+        var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+        a.download=outName;document.body.appendChild(a);a.click();
+        setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000);
+      }
       say(t[4],false);
     }catch(e){say(t[5],true)}
     finally{btn.disabled=false;file.value=''}
