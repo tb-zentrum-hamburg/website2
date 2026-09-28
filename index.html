@@ -8249,7 +8249,7 @@ function hex(n){var a=new Uint8Array(n);crypto.getRandomValues(a);return Array.p
 async function encryptPdf(file,pw){
   await loadLib();var P=PDFLib;
   var doc=await P.PDFDocument.load(await file.arrayBuffer());
-  doc.context.header=P.PDFHeader.forVersion(1,7); // erzwingt AES-128
+  doc.context.header=P.PDFHeader.forVersion(1,5); // erzwingt RC4-128 (V2/R3) statt AES-Crypt-Filter
   await doc.encrypt({userPassword:pw,ownerPassword:hex(16),permissions:{printing:'highResolution',modifying:false,copying:true,annotating:true,fillingForms:true,contentAccessibility:true,documentAssembly:false}});
   return doc.save();
 }
